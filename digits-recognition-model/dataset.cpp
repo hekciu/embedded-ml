@@ -7,20 +7,29 @@
 #include "dataset.hpp"
 
 
-std::vector<std::vector<std::string>> ExtractCsvCells(std::ifstream& fin, const char& delimiter);
-void PrintCsvCells(const std::vector<std::vector<std::string>>& cells);
-
-
-std::vector<cv::Mat> ExtractDigitsDataCsv(const std::string& filePath) {
+std::pair<std::vector<uchar>, std::vector<cv::Mat>> ExtractDigitsDataCsv(const std::string& filePath) {
 	std::ifstream fin(filePath);
 
-	const auto cells = ExtractCsvCellsAsBytes(fin, ',');
-
-	PrintCsvCells(cells);
+	auto rows = ExtractCsvCellsAsBytes(fin, ',');
 
 	fin.close();
 
-	return {};
+	std::vector<uchar> digits = {};
+	std::vector<cv::Mat> images = {};
+
+	for (auto& row : rows) {
+		//cv::Mat image({ 28, 28 }, row.data());
+
+		digits.push_back(*row.data());
+		const auto image = cv::Mat(28, 28, cv::DataType<uchar>::type, row.data() + 1);
+		//const auto image = cv::Mat::create();
+
+		const uchar* data = row.data();
+
+		images.push_back(image.clone());
+	}
+
+	return { digits, images };
 }
 
 
@@ -28,8 +37,6 @@ std::vector<std::vector<std::string>> ExtractCsvCells(std::ifstream& fin, const 
 	std::vector<std::vector<std::string>> output = {};
 
 	std::string line;
-
-		size_t i = 0;
 
 	while (std::getline(fin, line)) {
 		std::vector<std::string> row = {};
@@ -49,9 +56,6 @@ std::vector<std::vector<std::string>> ExtractCsvCells(std::ifstream& fin, const 
 
 		row.push_back(cell);
 
-		std::cout << i << '\n';
-		i++;
-
 		output.push_back(row);
 	}
 
@@ -64,8 +68,7 @@ std::vector<std::vector<uint8_t>> ExtractCsvCellsAsBytes(std::ifstream& fin, con
 
 	std::string line;
 
-	size_t i = 0;
-
+	// skip first one
 	std::getline(fin, std::string());
 
 	while (std::getline(fin, line)) {
@@ -79,19 +82,11 @@ std::vector<std::vector<uint8_t>> ExtractCsvCellsAsBytes(std::ifstream& fin, con
 
 				row.push_back(value);
 				cell = "";
-
 				continue;
 			}
 
 			cell += c;
 		}
-
-		uint8_t value = std::stoi(cell);
-		row.push_back(value);
-
-		std::cout << i << '\n';
-		i++;
-
 		output.push_back(row);
 	}
 
