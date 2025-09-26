@@ -1,7 +1,6 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
-
 #include "model-training.hpp"
 
 // https://github.com/doleron/opencv-deep-learning-c-plusplus/blob/master/googlenet_classification.cpp
@@ -61,6 +60,7 @@ ModelDescription::~ModelDescription() {
 
 void ModelDescription::Init() {
 	const TF_Operation* init_ops[] = {init_op};
+
 	TF_SessionRun(
 		session,
 		NULL,
@@ -223,6 +223,7 @@ bool ModelDescription::Okay() const {
 
 
 TF_Buffer* ModelDescription::ReadFile(const std::string& filename) {
+	/*
 	std::ifstream fin(filename);
 
 	std::string file_content = "";
@@ -233,8 +234,12 @@ TF_Buffer* ModelDescription::ReadFile(const std::string& filename) {
 	}
 
 	fin.close();
+	*/
 
-	return TF_NewBufferFromString(file_content.c_str(), file_content.size());
+
+	std::string fileData(std::istreambuf_iterator<char>{std::ifstream(filename, std::ios::binary)}, {});
+
+	return TF_NewBufferFromString(fileData.c_str(), fileData.size());
 }
 
 TF_Tensor* ModelDescription::ScalarStringTensor(const std::string& str, TF_Status* status) {
