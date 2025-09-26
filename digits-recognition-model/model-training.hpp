@@ -1,0 +1,36 @@
+#pragma once
+
+#include <string>
+
+#include <tensorflow/c/c_api.h>
+
+
+struct ModelDescription {
+	ModelDescription(const std::string& graph_def_filename);
+	~ModelDescription();
+
+	static enum class CheckpointType {
+		Save,
+		Restore
+	};
+
+	void Init();
+	void Predict(const float* batch, const size_t batch_size);
+	void RunTrainStep();
+	void Checkpoint(const std::string& checkpoint_prefix, const CheckpointType& type);
+	bool Okay() const;
+
+	static TF_Buffer* ReadFile(const std::string& filename);
+	 static TF_Tensor* ScalarStringTensor(const std::string& data, TF_Status* status);
+
+	TF_Graph* graph;
+	TF_Session* session;
+	TF_Status* status;
+
+	TF_Output input, target, output;
+
+	TF_Operation *init_op, *train_op, *save_op, *restore_op;
+	TF_Output checkpoint_file;
+};
+
+
