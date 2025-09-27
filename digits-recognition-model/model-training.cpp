@@ -33,18 +33,39 @@ ModelDescription::ModelDescription(const std::string& filename) {
 
 	input.oper = TF_GraphOperationByName(graph, "input");
 	input.index = 0;
+
+	if (input.oper == NULL) throw std::exception("input.oper is NULL");
+
 	target.oper = TF_GraphOperationByName(graph, "target");
 	target.index = 0;
+
+	if (target.oper == NULL) throw std::exception("target.oper is NULL");
+
 	output.oper = TF_GraphOperationByName(graph, "output");
 	output.index = 0;
 
+	if (output.oper == NULL) throw std::exception("output.oper is NULL");
+
 	init_op = TF_GraphOperationByName(graph, "init");
+
+	if (init_op == NULL) throw std::exception("init_op is NULL");
+
 	train_op = TF_GraphOperationByName(graph, "train");
+
+	if (train_op == NULL) throw std::exception("train_op is NULL");
+
 	save_op = TF_GraphOperationByName(graph, "save/control_dependency");
+
+	if (save_op == NULL) throw std::exception("save_op is NULL");
+
 	restore_op = TF_GraphOperationByName(graph, "save/restore_all");
+
+	if (restore_op == NULL) throw std::exception("restore_op is NULL");
 
 	checkpoint_file.oper = TF_GraphOperationByName(graph, "save/Const");
 	checkpoint_file.index = 0;
+
+	if (checkpoint_file.oper == NULL) throw std::exception("checkpoint_file.oper is NULL");
 };
 
 

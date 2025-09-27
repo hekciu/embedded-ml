@@ -51,7 +51,7 @@ int main()
 
 	try {
 
-		ModelDescription model("../../../frozen_models/graph.pb");
+		ModelDescription model("../../../frozen_models/graph_v1.pb");
 
 		if (restore) {
 			std::cout << "Restoring weights from checkpoint" << '\n';
