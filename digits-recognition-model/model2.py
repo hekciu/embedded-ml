@@ -5,9 +5,6 @@ tf.disable_v2_behavior()
 
 # Training Parameters
 learning_rate = 0.001
-num_steps = 200
-batch_size = 128
-display_step = 10
 
 # Network Parameters
 num_input = 784 # MNIST data input (img shape: 28*28)
@@ -17,7 +14,7 @@ dropout = 0.75 # Dropout, probability to keep units
 # tf Graph input
 X = tf.placeholder(tf.float32, [None, num_input], name='input')
 Y = tf.placeholder(tf.float32, [None, num_classes], name='target')
-keep_prob = tf.placeholder(tf.float32) # dropout (keep probability)
+# keep_prob = tf.placeholder(tf.float32) # dropout (keep probability)
 
 
 # Create some wrappers for simplicity
@@ -83,8 +80,8 @@ biases = {
 }
 
 # Construct model
-logits = conv_net(X, weights, biases, keep_prob)
-prediction = tf.identity(tf.nn.softmax(logits), name='output')
+logits = tf.identity(conv_net(X, weights, biases, dropout), name='output')
+prediction = tf.nn.softmax(logits)
 
 # Define loss and optimizer
 loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
@@ -111,3 +108,10 @@ print('Run this operation to restore a checkpoint     : ', saver_def.restore_op_
 # Write the graph out to a file.
 with open('frozen_models/graph_v1.pb', 'wb') as f:
   f.write(tf.get_default_graph().as_graph_def().SerializeToString())
+
+g = tf.get_default_graph()
+
+ops = g.get_operations()
+
+for op in ops:
+  print(op.name, op.type)

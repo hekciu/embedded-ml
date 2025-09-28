@@ -152,10 +152,10 @@ static void VisualizePrediction(const float* prediction) {
 
 
 void ModelDescription::Predict(const float* input_data) {
-	const int64_t dims[] = {1, 1, 28 * 28};
+	const int64_t dims[] = {1, 28 * 28};
 
 	const size_t nbytes = 28 * 28 * sizeof(float);
-	TF_Tensor* tensor = TF_AllocateTensor(TF_FLOAT, dims, 3, nbytes);
+	TF_Tensor* tensor = TF_AllocateTensor(TF_FLOAT, dims, 2, nbytes);
 
 	memcpy(TF_TensorData(tensor), input_data, nbytes);
 
