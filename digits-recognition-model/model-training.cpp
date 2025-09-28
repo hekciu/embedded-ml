@@ -151,7 +151,7 @@ static void VisualizePrediction(const float* prediction) {
 }
 
 
-void ModelDescription::Predict(const float* input_data) {
+std::vector<float> ModelDescription::Predict(const float* input_data) {
 	const int64_t dims[] = {1, 28 * 28};
 
 	const size_t nbytes = 28 * 28 * sizeof(float);
@@ -192,23 +192,39 @@ void ModelDescription::Predict(const float* input_data) {
 		throw std::exception("Predictions tensor do not match excepted nbytes");
 	}
 
-	VisualizePrediction((float*)TF_TensorData(output_values[0]));
+	//VisualizePrediction((float*)TF_TensorData(output_values[0]));
+
+	std::vector<float> output = {};
+
+	for (uint8_t i = 0; i < 10; i++) {
+		output.push_back(*((float*)TF_TensorData(output_values[0]) + i));
+	}
 
 	TF_DeleteTensor(output_values[0]);
+
+	return output;
 }
 
 
 static std::pair<TF_Tensor*, TF_Tensor*> CreateTrainTensors(const std::vector<float>& image_data, const uint8_t element) {
 	const size_t input_data_size = image_data.size() * sizeof(float);
 
-	const int64_t inputs_dims[] = { 1, 1, image_data.size() };
-	const int64_t targets_dims[] = { 1, 1, 1 };
+	const int64_t inputs_dims[] = { 1, image_data.size() };
+	const int64_t targets_dims[] = { 1, 10 };
 
-	TF_Tensor* inputs_tensor = TF_AllocateTensor(TF_FLOAT, inputs_dims, 3, input_data_size);
-	TF_Tensor* targets_tensor = TF_AllocateTensor(TF_FLOAT, targets_dims, 3, 1 * sizeof(float));
+	TF_Tensor* inputs_tensor = TF_AllocateTensor(TF_FLOAT, inputs_dims, 2, input_data_size);
+	TF_Tensor* targets_tensor = TF_AllocateTensor(TF_FLOAT, targets_dims, 2, 10 * sizeof(float));
 
 	memcpy(TF_TensorData(inputs_tensor), image_data.data(), input_data_size);
-	*(float*)(TF_TensorData(targets_tensor)) = static_cast<float>(element);
+
+	for (uint8_t i = 0; i < 10; i++) {
+		if (element == i) {
+			*(((float*)TF_TensorData(targets_tensor)) + i) = 1.0;
+		}
+		else {
+			*(((float*)TF_TensorData(targets_tensor)) + i) = 0.0;
+		}
+	}
 
 	//std::cout << "train target tensor data " << *(float*)(TF_TensorData(targets_tensor)) << std::endl;
 

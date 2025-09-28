@@ -46,6 +46,19 @@ std::vector<std::vector<float>> NormalizeDigitsData(const std::vector<cv::Mat>& 
 }
 
 
+uint8_t GetWinningDigit(const float* data) {
+	uint8_t output = 0;
+
+	for (uint8_t i = 0; i < 10; i++) {
+		if (*(data + i) > *(data + output)) {
+			output = i;
+		}
+	}
+
+	return output;
+}
+
+
 int main()
 {
 	/*
@@ -86,19 +99,28 @@ int main()
 
 		const auto& normalizedDigitsData = NormalizeDigitsData(digitsData.second);
 
-		const auto& testdata = normalizedDigitsData[50].data();
+		//const auto& testdata = normalizedDigitsData[50].data();
 
-		std::cout << "initial predictions: " << std::endl;
-		model.Predict(testdata);
+		//const auto& initialPrediction = model.Predict(testdata);
+
+		//std::cout << "initial predictions: " << GetWinningDigit(initialPrediction.data()) << std::endl;
 
 		std::cout << "Training " << std::endl;
 		for (int i = 0; i < normalizedDigitsData.size(); i++) {
-			//std::cout << "AAAAAA " << i << std::endl;
+			if (i % 1000 == 0) {
+				std::cout << "AAAAAA " << i << std::endl;
+			}
 			model.RunTrainStep(normalizedDigitsData[i], digitsData.first[i]);
 		}
 
-		std::cout << "Updated predictions (should be: " << (int)digitsData.first[50] <<"): " << std::endl;
-		model.Predict(testdata);
+		for (int i = 0; i < 50; i++) {
+			const auto& testdata = normalizedDigitsData[i].data();
+
+			std::cout << "Predictions (should be: " << (int)digitsData.first[i] <<"): " << std::endl;
+			const auto& initialPrediction = model.Predict(testdata);
+
+			std::cout << "prediction: " << (int)GetWinningDigit(initialPrediction.data()) << std::endl;
+		}
 	}
 	catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
