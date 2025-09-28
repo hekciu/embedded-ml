@@ -6,83 +6,41 @@ import tensorflow as tf2
 from tensorflow import keras
 from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 
-# The LOSS function measures the guessed answers against the known correct 
-# answers and measures how well or how badly it did
-# then uses the OPTIMIZER function to make another guess. Based on how the 
-# loss function went, it will try to minimize the loss.
-
-
-
-
-# g = tf.Graph()
-# with g.as_default():
-#     model = tf.keras.models.Sequential([keras.layers.Dense(units=1, input_shape=[1])])
-
-#     model.compile(optimizer='sgd', loss='mean_squared_error')
-
-#     # train_op
-#     # train_op = optimizer.minimize(loss, name='train')
-
-#     ops = g.get_operations()
-
-#     for op in ops:
-#         print(op.name, op.type)
-
-#     # Save graph
-#     tf.io.write_graph(g.as_graph_def(), 'frozen_models', 'filename.pb', as_text=False)
-
-# exit()
-
-
-# model = tf.keras.models.Sequential([keras.layers.Dense(units=1, input_shape=[1])])
-
-# model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
-
-# xs = tf.constant([[1.0]])
-# ys = tf.constant([[3.0]])
-
-# model.train_on_batch(xs, ys)
-
-# full_model = tf.function(lambda x: model(x))
-
-# full_model = full_model.get_concrete_function(
-#     tf.TensorSpec(model.inputs[0].shape, model.inputs[0].dtype, name="input")
-#     )
-
-# # Get frozen ConcreteFunction
-# frozen_func = convert_variables_to_constants_v2(full_model)
-# frozen_func.graph.as_graph_def()
-
-# graph = model.train_function.get_concrete_function(iter([(xs, ys)])).graph
-
-# layers = [op for op in frozen_func.graph.get_operations()]
-# print("-" * 60)
-# print("Frozen model layers: ")
-# for layer in layers:
-#     print(layer.name, layer.type)
-    
-# print("-" * 60)
-# print("Frozen model inputs: ")
-# print(frozen_func.inputs)
-# print("Frozen model outputs: ")
-# print(frozen_func.outputs)
-
-# tf.io.write_graph(graph_or_graph_def=frozen_func.graph,
-#                   logdir="./frozen_models",
-#                   name="graph.pb",
-#                   as_text=False)
+from tensorflow.keras.optimizers import Nadam
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Flatten, Dense, AvgPool2D, BatchNormalization, Dropout
+from tensorflow.keras.layers.experimental import preprocessing
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras.callbacks import EarlyStopping
 
 tf.disable_v2_behavior()
 
+# model.compile(loss=loss, optimizer=optimizer, 
+#               metrics=['acc'])
+
 # Batch of input and target output (1x1 matrices)
-x = tf.placeholder(tf.float32, shape=[None, 1, 1], name='input')
+x = tf.placeholder(tf.float32, shape=[None, 28, 28], name='input')
 y = tf.placeholder(tf.float32, shape=[None, 1, 1], name='target')
 
-# Trivial linear model
 y_ = tf.identity(tf.layers.dense(x, 1), name='output')
+
+# loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False, name='loss')
+# optimizer = tf.keras.optimizers.RMSprop(learning_rate=0.001)
+
+# Trivial linear model
+# y_ = tf.identity(tf.layers.dense(x, 1), name='output')
 
 # Optimize loss
 loss = tf.reduce_mean(tf.square(y_ - y), name='loss')
+
+# outputs = model(x, name='output')
+
+# digits = [tf.Variable(d) for d in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]]
+
+# y_ = model(x)
+
+# train_op = optimizer.minimize(lambda : loss(y_, y), var_list = [y, y_], name='train')
+
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
 train_op = optimizer.minimize(loss, name='train')
 

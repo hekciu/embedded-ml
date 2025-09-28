@@ -15,8 +15,8 @@ struct ModelDescription {
 	};
 
 	void Init();
-	void Predict(const float* batch, const size_t batch_size);
-	void RunTrainStep();
+	void Predict(const float* input_data);
+	void RunTrainStep(const std::vector<float>& image_data, const uint8_t element);
 	void Checkpoint(const std::string& checkpoint_prefix, const CheckpointType& type);
 	bool Okay() const;
 

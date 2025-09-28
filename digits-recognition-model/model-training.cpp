@@ -1,6 +1,7 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
+#include <vector>
 #include "model-training.hpp"
 
 // https://github.com/doleron/opencv-deep-learning-c-plusplus/blob/master/googlenet_classification.cpp
@@ -143,13 +144,13 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 }
 
 
-void ModelDescription::Predict(const float* batch, const size_t batch_size) {
-	const int64_t dims[] = { batch_size, 1, 1 };
+void ModelDescription::Predict(const float* input_data) {
+	const int64_t dims[] = {1, 1, 28 * 28};
 
-	const size_t nbytes = batch_size * sizeof(float);
+	const size_t nbytes = 28 * 28 * sizeof(float);
 	TF_Tensor* tensor = TF_AllocateTensor(TF_FLOAT, dims, 3, nbytes);
 
-	memcpy(TF_TensorData(tensor), batch, nbytes);
+	memcpy(TF_TensorData(tensor), input_data, nbytes);
 
 	TF_Output inputs[] = { input };
 	TF_Tensor* input_values[] = { tensor };
@@ -178,58 +179,53 @@ void ModelDescription::Predict(const float* batch, const size_t batch_size) {
 
 	if (!Okay()) throw std::exception("Could not run prediction session");
 
-	if (TF_TensorByteSize(output_values[0]) != nbytes) {
+	if (TF_TensorByteSize(output_values[0]) != 1 * sizeof(float)) {
 		throw std::exception("Predictions tensor do not match excepted nbytes");
 	}
 
-	float* predictions = (float*)malloc(nbytes);
+	uint8_t prediction = (uint8_t)*(float*)TF_TensorData(output_values[0]);
 
-	if (predictions == NULL) throw std::exception("Could not allocate memory for predictons");
-
-	memcpy(predictions, TF_TensorData(output_values[0]), nbytes);
 	TF_DeleteTensor(output_values[0]);
 
 	std::cout << "predictions: " << '\n';
-	for (size_t i = 0; i < batch_size; i++) {
-		std::cout << "x: " << batch[i] << " predicted: " << predictions[i] << std::endl;
-	}
-
-	free(predictions);
+	std::cout << " predicted: " << (int)prediction << std::endl;
 }
 
 
-static void NextBatchForTraining(TF_Tensor** inputs_tensor,
-	TF_Tensor** targets_tensor) {
-#define BATCH_SIZE 10
-	float inputs[BATCH_SIZE] = { 0 };
-	float targets[BATCH_SIZE] = { 0 };
-	for (int i = 0; i < BATCH_SIZE; ++i) {
-		inputs[i] = (float)rand() / (float)RAND_MAX;
-		targets[i] = 3.0 * inputs[i] + 2.0;
-	}
-	const int64_t dims[] = { BATCH_SIZE, 1, 1 };
-	size_t nbytes = BATCH_SIZE * sizeof(float);
-	*inputs_tensor = TF_AllocateTensor(TF_FLOAT, dims, 3, nbytes);
-	*targets_tensor = TF_AllocateTensor(TF_FLOAT, dims, 3, nbytes);
-	memcpy(TF_TensorData(*inputs_tensor), inputs, nbytes);
-	memcpy(TF_TensorData(*targets_tensor), targets, nbytes);
-#undef BATCH_SIZE
-};
+static std::pair<TF_Tensor*, TF_Tensor*> CreateTrainTensors(const std::vector<float>& image_data, const uint8_t element) {
+	const size_t input_data_size = image_data.size() * sizeof(float);
+
+	const int64_t inputs_dims[] = { 1, 1, image_data.size() };
+	const int64_t targets_dims[] = { 1, 1, 1 };
+
+	TF_Tensor* inputs_tensor = TF_AllocateTensor(TF_FLOAT, inputs_dims, 3, input_data_size);
+	TF_Tensor* targets_tensor = TF_AllocateTensor(TF_FLOAT, targets_dims, 3, 1 * sizeof(float));
+
+	memcpy(TF_TensorData(inputs_tensor), image_data.data(), input_data_size);
+	*(float*)(TF_TensorData(targets_tensor)) = static_cast<float>(element);
+
+	std::cout << "train target tensor data " << *(float*)(TF_TensorData(targets_tensor)) << std::endl;
+
+	return { inputs_tensor, targets_tensor };
+}
 
 
-void ModelDescription::RunTrainStep() {
-  TF_Tensor *x, *y;
-  NextBatchForTraining(&x, &y);
-  TF_Output inputs[2] = {input, target};
-  TF_Tensor* input_values[2] = {x, y};
-  const TF_Operation* train_ops[1] = {train_op};
-  TF_SessionRun(session, NULL, inputs, input_values, 2,
-                /* No outputs */
-                NULL, NULL, 0, train_ops, 1, NULL, status);
-  TF_DeleteTensor(x);
-  TF_DeleteTensor(y);
+void ModelDescription::RunTrainStep(const std::vector<float>& image_data, const uint8_t element) {
+	const auto& tensorsXY = CreateTrainTensors(image_data, element);
 
-  if (!Okay()) throw std::exception("Could not run train step");
+	const auto& x = tensorsXY.first;
+	const auto& y = tensorsXY.second;
+
+	TF_Output inputs[2] = {input, target};
+	TF_Tensor* input_values[2] = {x, y};
+	const TF_Operation* train_ops[1] = {train_op};
+	TF_SessionRun(session, NULL, inputs, input_values, 2,
+				/* No outputs */
+				NULL, NULL, 0, train_ops, 1, NULL, status);
+	TF_DeleteTensor(x);
+	TF_DeleteTensor(y);
+
+	if (!Okay()) throw std::exception("Could not run train step");
 }
 
 

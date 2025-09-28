@@ -27,10 +27,28 @@ bool DirectoryExists(const std::string& directory_name) {
 }
 
 
+std::vector<std::vector<float>> NormalizeDigitsData(const std::vector<cv::Mat>& data) {
+	std::vector<std::vector<float>> output = {};
+
+	const size_t image_size = 28 * 28;
+
+	for (const auto& mat : data) {
+		std::vector<float> img = {};
+
+		for (size_t i = 0; i < image_size; i++) {
+			img.push_back(static_cast<float>(*(mat.data + i)) / static_cast<float>(255.0));
+		}
+
+		output.push_back(img);
+	}
+
+	return output;
+}
+
+
 int main()
 {
 	/*
-	const auto digitsData = ExtractDigitsDataCsv("Train.csv");
 	const auto& digits = digitsData.first;
 	const auto& images = digitsData.second;
 
@@ -44,6 +62,8 @@ int main()
 
 	//PrintMatrix2D(digitsData[0], {28, 28});
 	*/
+
+	const auto digitsData = ExtractDigitsDataCsv("Train.csv");
 
 	std::cout << TF_Version() << std::endl;
 
@@ -64,18 +84,21 @@ int main()
 			model.Init();
 		}
 
-		float testdata[] = { 1.0, 2.0, 3.0 };
+		const auto& normalizedDigitsData = NormalizeDigitsData(digitsData.second);
+
+		const auto& testdata = normalizedDigitsData[0].data();
 
 		std::cout << "initial predictions: " << std::endl;
-		model.Predict(testdata, 3);
+		model.Predict(testdata);
 
 		std::cout << "Training " << std::endl;
-		for (int i = 0; i < 200; i++) {
-			model.RunTrainStep();
+		for (int i = 0; i < normalizedDigitsData.size(); i++) {
+			//std::cout << "AAAAAA " << i << std::endl;
+			model.RunTrainStep(normalizedDigitsData[i], digitsData.first[i]);
 		}
 
 		std::cout << "Updated predictions: " << std::endl;
-		model.Predict(testdata, 3);
+		model.Predict(testdata);
 	}
 	catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;
