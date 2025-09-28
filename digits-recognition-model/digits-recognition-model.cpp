@@ -86,7 +86,7 @@ int main()
 
 		const auto& normalizedDigitsData = NormalizeDigitsData(digitsData.second);
 
-		const auto& testdata = normalizedDigitsData[0].data();
+		const auto& testdata = normalizedDigitsData[50].data();
 
 		std::cout << "initial predictions: " << std::endl;
 		model.Predict(testdata);
@@ -97,7 +97,7 @@ int main()
 			model.RunTrainStep(normalizedDigitsData[i], digitsData.first[i]);
 		}
 
-		std::cout << "Updated predictions: " << std::endl;
+		std::cout << "Updated predictions (should be: " << (int)digitsData.first[50] <<"): " << std::endl;
 		model.Predict(testdata);
 	}
 	catch (const std::exception& ex) {

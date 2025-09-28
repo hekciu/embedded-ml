@@ -15,12 +15,22 @@ from tensorflow.keras.callbacks import EarlyStopping
 
 tf.disable_v2_behavior()
 
+def get_logits(features, weights, biases):
+# network's forward pass, multiply inputs with weight
+    return tf.add(tf.matmul(features, weights), biases)
+
 # model.compile(loss=loss, optimizer=optimizer, 
 #               metrics=['acc'])
 
 # Batch of input and target output (1x1 matrices)
-x = tf.placeholder(tf.float32, shape=[None, 28, 28], name='input')
+x = tf.placeholder(tf.float32, shape=[None, 1, 28 * 28], name='input')
 y = tf.placeholder(tf.float32, shape=[None, 1, 1], name='target')
+
+n_inputs = 28 * 28
+n_classes = 10
+
+weights = tf.Variable(tf.random.normal([n_inputs, n_classes]), dtype='float32', name='weights')
+biases = tf.Variable(tf.random.normal([n_classes]), dtype='float32', name='biases')
 
 y_ = tf.identity(tf.layers.dense(x, 1), name='output')
 
@@ -30,8 +40,10 @@ y_ = tf.identity(tf.layers.dense(x, 1), name='output')
 # Trivial linear model
 # y_ = tf.identity(tf.layers.dense(x, 1), name='output')
 
+logits = get_logits(x, weights, biases)
+
 # Optimize loss
-loss = tf.reduce_mean(tf.square(y_ - y), name='loss')
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=logits), name='loss')
 
 # outputs = model(x, name='output')
 
@@ -42,6 +54,7 @@ loss = tf.reduce_mean(tf.square(y_ - y), name='loss')
 # train_op = optimizer.minimize(lambda : loss(y_, y), var_list = [y, y_], name='train')
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
+# optimizer = tf.train.SGD(learning_rate=0.001)
 train_op = optimizer.minimize(loss, name='train')
 
 init = tf.global_variables_initializer()

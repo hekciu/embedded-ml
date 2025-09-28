@@ -51,7 +51,7 @@ ModelDescription::ModelDescription(const std::string& filename) {
 
 	if (init_op == NULL) throw std::exception("init_op is NULL");
 
-	train_op = TF_GraphOperationByName(graph, "train");
+	train_op = TF_GraphOperationByName(graph, "Adam");
 
 	if (train_op == NULL) throw std::exception("train_op is NULL");
 
@@ -144,6 +144,13 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 }
 
 
+static void VisualizePrediction(const float* prediction) {
+	for (int i = 0; i < 10; i++) {
+		std::cout << "digit: " << i << " probability: " << *(prediction + i) << std::endl;
+	}
+}
+
+
 void ModelDescription::Predict(const float* input_data) {
 	const int64_t dims[] = {1, 1, 28 * 28};
 
@@ -155,7 +162,9 @@ void ModelDescription::Predict(const float* input_data) {
 	TF_Output inputs[] = { input };
 	TF_Tensor* input_values[] = { tensor };
 	TF_Output outputs[] = { output };
-	TF_Tensor* output_values[] = { NULL };
+	TF_Tensor* output_values[1] = {
+		NULL
+	};
 
 	TF_SessionRun(
 		session,
@@ -179,16 +188,13 @@ void ModelDescription::Predict(const float* input_data) {
 
 	if (!Okay()) throw std::exception("Could not run prediction session");
 
-	if (TF_TensorByteSize(output_values[0]) != 1 * sizeof(float)) {
+	if (TF_TensorByteSize(output_values[0]) != 10 * sizeof(float)) {
 		throw std::exception("Predictions tensor do not match excepted nbytes");
 	}
 
-	uint8_t prediction = (uint8_t)*(float*)TF_TensorData(output_values[0]);
+	VisualizePrediction((float*)TF_TensorData(output_values[0]));
 
 	TF_DeleteTensor(output_values[0]);
-
-	std::cout << "predictions: " << '\n';
-	std::cout << " predicted: " << (int)prediction << std::endl;
 }
 
 
@@ -204,7 +210,7 @@ static std::pair<TF_Tensor*, TF_Tensor*> CreateTrainTensors(const std::vector<fl
 	memcpy(TF_TensorData(inputs_tensor), image_data.data(), input_data_size);
 	*(float*)(TF_TensorData(targets_tensor)) = static_cast<float>(element);
 
-	std::cout << "train target tensor data " << *(float*)(TF_TensorData(targets_tensor)) << std::endl;
+	//std::cout << "train target tensor data " << *(float*)(TF_TensorData(targets_tensor)) << std::endl;
 
 	return { inputs_tensor, targets_tensor };
 }
