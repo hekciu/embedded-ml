@@ -80,7 +80,10 @@ int main()
 
 	std::cout << TF_Version() << std::endl;
 
-	bool restore = DirectoryExists("checkpoints");
+	//bool restore = DirectoryExists("checkpoints");
+
+	bool restore = false;
+	int prescaleTrainData = 21; // 1 => all train data
 
 	try {
 
@@ -89,7 +92,7 @@ int main()
 		if (restore) {
 			std::cout << "Restoring weights from checkpoint" << '\n';
 
-			model.Checkpoint("./checkpoints/checkpoint", ModelDescription::CheckpointType::Restore);
+			model.Checkpoint("./checkpoints/checkpoint_1", ModelDescription::CheckpointType::Restore);
 		}
 		else {
 			std::cout << "Initializing model weights" << '\n';
@@ -106,7 +109,7 @@ int main()
 		//std::cout << "initial predictions: " << GetWinningDigit(initialPrediction.data()) << std::endl;
 
 		std::cout << "Training " << std::endl;
-		for (int i = 0; i < normalizedDigitsData.size(); i++) {
+		for (int i = 0; i < normalizedDigitsData.size() / prescaleTrainData; i++) {
 			if (i % 1000 == 0) {
 				std::cout << "AAAAAA " << i << std::endl;
 			}
@@ -121,6 +124,10 @@ int main()
 
 			std::cout << "prediction: " << (int)GetWinningDigit(initialPrediction.data()) << std::endl;
 		}
+
+		// https://danishshres.medium.com/
+
+		model.Checkpoint("./checkpoints/checkpoint_1", ModelDescription::CheckpointType::Save);
 	}
 	catch (const std::exception& ex) {
 		std::cerr << ex.what() << std::endl;

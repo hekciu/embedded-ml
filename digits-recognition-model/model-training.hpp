@@ -21,7 +21,8 @@ struct ModelDescription {
 	bool Okay() const;
 
 	static TF_Buffer* ReadFile(const std::string& filename);
-	 static TF_Tensor* ScalarStringTensor(const std::string& data, TF_Status* status);
+	static TF_Tensor* ScalarStringTensor(const std::string& data, TF_Status* status);
+	static void StringDeallocator(void* data, size_t len, void* arg);
 
 	TF_Graph* graph;
 	TF_Session* session;

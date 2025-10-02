@@ -120,6 +120,8 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 		type == CheckpointType::Save ? save_op : restore_op
 	};
 
+	std::cout << "checkpoint before" << std::endl;
+
 	TF_SessionRun(
 		session,
 		NULL,
@@ -137,6 +139,8 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 		NULL,
 		status
 	);
+
+	std::cout << "checkpoint after" << std::endl;
 
 	TF_DeleteTensor(tensor);
 
@@ -281,14 +285,42 @@ TF_Buffer* ModelDescription::ReadFile(const std::string& filename) {
 	return TF_NewBufferFromString(fileData.c_str(), fileData.size());
 }
 
+void ModelDescription::StringDeallocator(void* data, size_t len, void* arg) {
+	//free(data);
+}
+
 TF_Tensor* ModelDescription::ScalarStringTensor(const std::string& str, TF_Status* status) {
-	size_t nbytes = str.size(); // TF_StringEncodedSize() ????
+	//size_t nbytes = 8 + strlen(str.c_str()); <- z tym jest problem, poza tym powinno dzia³aæ
+	//TF_Tensor* t = TF_AllocateTensor(TF_STRING, NULL, 0, nbytes);
+	//void* data = TF_TensorData(t);
+	//memset(data, 0, 8);
+	//return t;
 
-	TF_Tensor* tensor = TF_AllocateTensor(TF_STRING, NULL, 0, nbytes);
+	const char* embedding = str.c_str();
 
-	void* data = TF_TensorData(tensor);
+	//TF_TString tstring[1];
+	//TF_TString_Init(&tstring[0]);
+	//TF_TString_Copy(&tstring[0], embedding, sizeof(embedding) - 1);
+	//int64_t dims[] = {1,1};
+	//int num_dims = 1;
 
-	memcpy(data, str.data(), nbytes);
+	//TF_Tensor* input_tensor = TF_NewTensor(TF_STRING, dims, num_dims, &tstring[0], sizeof(tstring), &ModelDescription::StringDeallocator, nullptr);
 
-	return tensor;
+	//return input_tensor;
+
+	int NumInputs = 1;    
+	TF_Tensor** InputValues = (TF_Tensor**)malloc(sizeof(TF_Tensor*)*NumInputs);
+
+	TF_TString* s0 = (TF_TString*)malloc(sizeof(TF_TString) * strlen(embedding));
+	TF_StringInit(s0);
+
+	TF_StringCopy(s0, embedding, strlen(embedding));
+
+	int ndims = 1;
+	int64_t dims[] = {1};    
+	int ndata = sizeof(TF_TString) * strlen(embedding);
+
+	TF_Tensor* str_tensor = TF_NewTensor(TF_STRING, dims, ndims, s0, ndata, &ModelDescription::StringDeallocator, 0); 
+
+	return str_tensor;
 }
