@@ -83,7 +83,7 @@ int main()
 	//bool restore = DirectoryExists("checkpoints");
 
 	bool restore = false;
-	int prescaleTrainData = 21; // 1 => all train data
+	int prescaleTrainData = 1; // 1 => all train data
 
 	try {
 
@@ -92,7 +92,7 @@ int main()
 		if (restore) {
 			std::cout << "Restoring weights from checkpoint" << '\n';
 
-			model.Checkpoint("./checkpoints/checkpoint_1", ModelDescription::CheckpointType::Restore);
+			model.Checkpoint("./checkpoints/checkpoint_real", ModelDescription::CheckpointType::Restore);
 		}
 		else {
 			std::cout << "Initializing model weights" << '\n';
