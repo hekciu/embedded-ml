@@ -1,17 +1,17 @@
-# import tensorflow.compat.v1 as tf
-# from google.protobuf import text_format
+import tensorflow.compat.v1 as tf
+from google.protobuf import text_format
 
 # import _locale
 # _locale.setlocale(_locale.LC_NUMERIC, 'en_US.UTF-8')
 
 
-# graph_filename = "./frozen_models/graph_v1.pb"
+graph_filename = "./frozen_models/graph_v1.pb"
 
 
-# with tf.io.gfile.GFile(graph_filename, "rb") as f:
-#     graph_def = tf.get_default_graph().as_graph_def()
-#     graph_str = f.read()
-#     graph_def.ParseFromString(f.read())
+with tf.io.gfile.GFile(graph_filename, "rb") as f:
+    graph_def = tf.get_default_graph().as_graph_def()
+    graph_str = f.read()
+    graph_def.ParseFromString(f.read())
 #     # with tf.Session(graph=graph_def) as persisted_sess:
 #     #         persisted_sess.graph.as_default()
 #     #         # tf.import_graph_def(graph_def, name='')
@@ -63,11 +63,11 @@
 #     builder.save()
 
 
-import tensorflow as tf
+# import tensorflow as tf
 
-imported = tf.saved_model.load("saved_model", tags=[])
+# imported = tf.compat.v1.saved_model.load("saved_model", [], "frozen_models")
 
-print(imported)
+# print(imported)
 
-f = imported.signatures["serving_default"]
-print(f(x=tf.constant([[1.]])))
+# f = imported.signatures["serving_default"]
+# print(f(x=tf.constant([[1.]])))

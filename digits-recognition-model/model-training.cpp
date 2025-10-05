@@ -120,8 +120,6 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 		type == CheckpointType::Save ? save_op : restore_op
 	};
 
-	std::cout << "checkpoint before" << std::endl;
-
 	TF_SessionRun(
 		session,
 		NULL,
@@ -139,8 +137,6 @@ void ModelDescription::Checkpoint(const std::string& checkpoint_prefix, const Ch
 		NULL,
 		status
 	);
-
-	std::cout << "checkpoint after" << std::endl;
 
 	TF_DeleteTensor(tensor);
 
