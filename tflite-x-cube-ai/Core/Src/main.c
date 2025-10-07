@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <string.h>
+#include <stdio.h>
 
 #include "ai_platform.h"
 #include "ai_datatypes_defines.h"
@@ -55,6 +56,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
+uint8_t uart_rx_data[20] = {0};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -65,19 +68,25 @@ static void MX_TIM16_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
-void UartTransmitMsg(const char* msg);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void UartTransmitMsg(const char* msg)
-{
-	uint32_t msg_size = strlen(msg);
-
-	HAL_UART_Transmit(&huart1, (uint8_t*)msg, msg_size, HAL_MAX_DELAY);
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) {
+//	if (huart->Instance == USART1) {
+//		uart_rx_data[6] = '\0';
+//
+//		uint8_t out[20] = {0};
+//
+//		int n = snprintf((char*)out, 20 - 1, "Hello! %s\n", uart_rx_data);
+//
+//		HAL_UART_Transmit(&huart1, out, 5, HAL_MAX_DELAY);
+//
+//
+//		HAL_UART_Receive_IT(&huart1, uart_rx_data, 5);
+//	}
+//}
 
 /* USER CODE END 0 */
 
@@ -115,7 +124,7 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM16_Init();
   MX_USART1_UART_Init();
-  MX_X_CUBE_AI_Init();
+//  MX_X_CUBE_AI_Init();
   /* USER CODE BEGIN 2 */
 //
 //  ai_error ai_err;
@@ -143,10 +152,12 @@ int main(void)
 //  };
 //
 //  // Set pointers wrapper structs to our data buffers
-//  ai_input[0].n_batches = 1;
+//  ai_input[0].n_batches = 1HAL_UART_RxCpltCallback;
 //  ai_input[0].data = AI_HANDLE_PTR(in_data);
 //  ai_output[0].n_batches = 1;
 //  ai_output[0].data = AI_HANDLE_PTR(out_data);
+
+//  HAL_UART_Receive_IT(&huart1, uart_rx_data, 5);
 
   /* USER CODE END 2 */
 
@@ -166,12 +177,12 @@ int main(void)
   while (1)
   {
 
-	  UartTransmitMsg("HELLO!");
-	  HAL_Delay(1000);
+		HAL_UART_Transmit(&huart1, (uint8_t*)"dupa\r\n", strlen("dupa"), 1000);
+		HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
-  MX_X_CUBE_AI_Process();
+//  MX_X_CUBE_AI_Process();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

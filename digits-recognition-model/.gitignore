@@ -4,3 +4,4 @@ data/
 .vs/
 graph.pb
 frozen_models/
+exported_savedmodel/
