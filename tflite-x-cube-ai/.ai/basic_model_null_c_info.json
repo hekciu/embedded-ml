@@ -225,44 +225,44 @@
   ],
   "environment": {
     "generated_model": {
-      "generated_time": "2025-10-05T22:07:48+0200",
+      "generated_time": "2025-10-25T22:16:48+0200",
       "model_files": [
         {
           "name": "basic_model_data_params.h",
-          "signature": "0x767089aefb113eab0e1516847646f621"
+          "signature": "0x7d0d292838afcc7105cc9de86bb3840d"
         },
         {
           "name": "basic_model_data_params.c",
-          "signature": "0x6d2b136942e45ddbc8183c63e4b341c5"
+          "signature": "0x1d23677de0fa174717485bfc0317520b"
         },
         {
           "name": "basic_model_data.h",
-          "signature": "0xca44ee8875829de07eceb2fe1712e596"
+          "signature": "0xfe1629872bd97a4e52db07572751262e"
         },
         {
           "name": "basic_model_data.c",
-          "signature": "0x5aa3a1e5eb06e1d1f2a32c3a4542da28"
+          "signature": "0x3c74ae72e6aefea6c8c03d606fad2a25"
         },
         {
           "name": "basic_model_config.h",
-          "signature": "0x9a9d49807bb73ebe7f4769e9b79da4fa"
+          "signature": "0x45f91f175abec7d52e210b8ce114bfad"
         },
         {
           "name": "basic_model.h",
-          "signature": "0xedcd8987a21aa744a3dea97ee1859223"
+          "signature": "0x7e5d2ff99ecea8e197cb1349d9c78a85"
         },
         {
           "name": "basic_model.c",
-          "signature": "0x8f9a8510c29b65cc351810516deb411e"
+          "signature": "0x28a96176977c385160730fec8765049e"
         }
       ],
       "name": "basic_model"
     },
-    "network_signature": "0xe64eada53706a92e",
+    "network_signature": "0x4165045f888a2c86",
     "test_name": "",
     "tools": [
       {
-        "arguments": "generate --target stm32wb --name basic_model -m C:/Users/jakub/Desktop/programming/stm32/ml-embedded/digits-recognition-model/basic_model_converted.tflite --compression none --verbosity 1 --workspace C:/Users/jakub/AppData/Local/Temp/mxAI_workspace3131644015635004150088647952012140 --output C:/Users/jakub/.stm32cubemx/basic_model_output",
+        "arguments": "generate --target stm32wb --name basic_model -m C:/Users/jakub/Desktop/programming/stm32/ml-embedded/digits-recognition-model/basic_model_converted.tflite --compression none --verbosity 1 --workspace C:/Users/jakub/AppData/Local/Temp/mxAI_workspace3171751999050010855649086471109620 --output C:/Users/jakub/.stm32cubemx/basic_model_output",
         "environment": [
           "STATS_TYPE=X-CUBE-AI"
         ],

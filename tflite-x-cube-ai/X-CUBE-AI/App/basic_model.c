@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    basic_model.c
   * @author  AST Embedded Analytics Research Platform
-  * @date    2025-10-05T22:07:48+0200
+  * @date    2025-10-25T22:16:48+0200
   * @brief   AI Tool Automatic Code Generator for Embedded NN computing
   ******************************************************************************
   * @attention
@@ -42,7 +42,7 @@
 #endif
 
 #undef AI_TOOLS_DATE_TIME
-#define AI_TOOLS_DATE_TIME   "2025-10-05T22:07:48+0200"
+#define AI_TOOLS_DATE_TIME   "2025-10-25T22:16:48+0200"
 
 #undef AI_TOOLS_COMPILE_TIME
 #define AI_TOOLS_COMPILE_TIME    __DATE__ " " __TIME__
@@ -227,7 +227,7 @@ AI_NETWORK_OBJ_DECLARE(
     3648, NULL, NULL),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_BASIC_MODEL_IN_NUM, &serving_default_flatten_input0_output),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_BASIC_MODEL_OUT_NUM, &gemm_2_output),
-  &gemm_1_layer, 0xe64eada5, NULL)
+  &gemm_1_layer, 0x4165045f, NULL)
 
 #else
 
@@ -247,7 +247,7 @@ AI_NETWORK_OBJ_DECLARE(
   ),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_BASIC_MODEL_IN_NUM, &serving_default_flatten_input0_output),
   AI_TENSOR_LIST_IO_OBJ_INIT(AI_FLAG_NONE, AI_BASIC_MODEL_OUT_NUM, &gemm_2_output),
-  &gemm_1_layer, 0xe64eada5, NULL)
+  &gemm_1_layer, 0x4165045f, NULL)
 
 #endif	/*(AI_TOOLS_API_VERSION < AI_TOOLS_API_VERSION_1_5)*/
 
@@ -348,7 +348,7 @@ ai_bool ai_basic_model_get_info(
       .params            = AI_STRUCT_INIT,
       .activations       = AI_STRUCT_INIT,
       .n_nodes           = 0,
-      .signature         = 0xe64eada5,
+      .signature         = 0x4165045f,
     };
 
     if (!ai_platform_api_get_network_report(network, &r)) return false;
@@ -396,7 +396,7 @@ ai_bool ai_basic_model_get_report(
       .map_weights       = AI_STRUCT_INIT,
       .map_activations   = AI_STRUCT_INIT,
       .n_nodes           = 0,
-      .signature         = 0xe64eada5,
+      .signature         = 0x4165045f,
     };
 
     if (!ai_platform_api_get_network_report(network, &r)) return false;

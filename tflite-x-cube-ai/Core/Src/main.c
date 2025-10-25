@@ -58,6 +58,9 @@ UART_HandleTypeDef huart1;
 
 uint8_t uart_rx_data[20] = {0};
 
+uint8_t out[20] = {0};
+uint16_t n_out = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -73,20 +76,30 @@ static void MX_USART1_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) {
-//	if (huart->Instance == USART1) {
-//		uart_rx_data[6] = '\0';
-//
-//		uint8_t out[20] = {0};
-//
-//		int n = snprintf((char*)out, 20 - 1, "Hello! %s\n", uart_rx_data);
-//
-//		HAL_UART_Transmit(&huart1, out, 5, HAL_MAX_DELAY);
-//
-//
-//		HAL_UART_Receive_IT(&huart1, uart_rx_data, 5);
-//	}
-//}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart) {
+	if (huart->Instance == USART1) {
+		uart_rx_data[6] = '\0';
+
+		n_out = snprintf((char*)out, 20 - 1, "Hello! %s\r\n", uart_rx_data);
+
+		HAL_UART_Receive_IT(&huart1, uart_rx_data, 5);
+	}
+}
+
+
+static ai_buffer *ai_input;
+static ai_buffer *ai_output;
+
+
+
+void ai_init(void) {
+  ai_input = AI_BASIC_MODEL_IN;
+  ai_output = AI_BASIC_MODEL_OUT;
+}
+
+static size_t buf_len = 0;
+static char buf[4096];
+
 
 /* USER CODE END 0 */
 
@@ -124,40 +137,54 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM16_Init();
   MX_USART1_UART_Init();
-//  MX_X_CUBE_AI_Init();
+  MX_X_CUBE_AI_Init();
   /* USER CODE BEGIN 2 */
-//
-//  ai_error ai_err;
-//  ai_i32 nbatch;
-//  uint32_t timestamp;
-//  float y_val[10];
-//  AI_ALIGNED(4) ai_u8 activations[AI_BASIC_MODEL_DATA_ACTIVATIONS_SIZE];
-//
-//  // Buffers used to store input and output tensors
-//  AI_ALIGNED(4) ai_i8 in_data[AI_BASIC_MODEL_IN_1_SIZE_BYTES];
-//  AI_ALIGNED(4) ai_i8 out_data[AI_BASIC_MODEL_OUT_1_SIZE_BYTES];
-//
-//  // Pointer to our model
-//  ai_handle sine_model = AI_HANDLE_NULL;
-//
-//  // Initialize wrapper structs that hold pointers to data and info about the
-//  // data (tensor height, width, channels)
-//  ai_buffer ai_input[AI_BASIC_MODEL_IN_NUM] = AI_BASIC_MODEL_IN;
-//  ai_buffer ai_output[AI_BASIC_MODEL_OUT_NUM] = AI_BASIC_MODEL_OUT;
-//
-//  // Set working memory and get weights/biases from model
-//  ai_network_params ai_params = {
-//    AI_BASIC_MODEL_DATA_WEIGHTS(ai_basic_model_data_weights_get()),
-//    AI_BASIC_MODEL_DATA_ACTIVATIONS(activations)
-//  };
-//
-//  // Set pointers wrapper structs to our data buffers
-//  ai_input[0].n_batches = 1HAL_UART_RxCpltCallback;
-//  ai_input[0].data = AI_HANDLE_PTR(in_data);
-//  ai_output[0].n_batches = 1;
-//  ai_output[0].data = AI_HANDLE_PTR(out_data);
+
+  ai_error ai_err;
+  ai_i32 nbatch;
+  uint32_t timestamp;
+  float y_val[10] = {0};
+  AI_ALIGNED(4) ai_u8 activations[AI_BASIC_MODEL_DATA_ACTIVATIONS_SIZE];
+
+  // Buffers used to store input and output tensors
+  AI_ALIGNED(4) ai_i8 in_data[AI_BASIC_MODEL_IN_1_SIZE_BYTES];
+  AI_ALIGNED(4) ai_i8 out_data[AI_BASIC_MODEL_OUT_1_SIZE_BYTES];
+
+  // Pointer to our model
+  ai_handle basic_model = AI_HANDLE_NULL;
+
+  // Initialize wrapper structs that hold pointers to data and info about the
+  // data (tensor height, width, channels)
+
+  // Set working memory and get weights/biases from model
+  ai_network_params ai_params = {
+    AI_BASIC_MODEL_DATA_WEIGHTS(ai_basic_model_data_weights_get()),
+    AI_BASIC_MODEL_DATA_ACTIVATIONS(activations)
+  };
+
+  // Set pointers wrapper structs to our data buffers
+  ai_input[0].data = AI_HANDLE_PTR(in_data);
+  ai_output[0].data = AI_HANDLE_PTR(out_data);
 
 //  HAL_UART_Receive_IT(&huart1, uart_rx_data, 5);
+
+  ai_err = ai_basic_model_create(&basic_model, AI_BASIC_MODEL_DATA_CONFIG);
+  if (ai_err.type != AI_ERROR_NONE)
+  {
+    buf_len = sprintf(buf, "Error: could not create NN instance\r\n");
+    HAL_UART_Transmit(&huart1, (uint8_t *)buf, buf_len, 100);
+    while(1);
+  }
+
+  if (!ai_basic_model_init(basic_model, &ai_params))
+  {
+    buf_len = sprintf(buf, "Error: could not initialize NN\r\n");
+    HAL_UART_Transmit(&huart1, (uint8_t *)buf, buf_len, 100);
+    while(1);
+  }
+
+
+
 
   /* USER CODE END 2 */
 
@@ -176,13 +203,53 @@ int main(void)
 
   while (1)
   {
+	    for (uint32_t i = 0; i < AI_BASIC_MODEL_IN_1_SIZE; i++)
+	    {
+	      ((ai_float *)in_data)[i] = (ai_float)2.0f;
+	    }
 
-		HAL_UART_Transmit(&huart1, (uint8_t*)"dupa\r\n", strlen("dupa"), 1000);
+	    // Get current timestamp
+//	    timestamp = htim16.Instance->CNT;
+
+	    // Perform inference
+	    nbatch = ai_basic_model_run(basic_model, &ai_input[0], &ai_output[0]);
+	    if (nbatch != 1) {
+	      buf_len = sprintf(buf, "Error: could not run inference\r\n");
+	      HAL_UART_Transmit(&huart1, (uint8_t *)buf, buf_len, 100);
+	    }
+
+	    for (size_t i = 0; i < 10; i++){
+	    	y_val[i] = *(out_data + i);
+	    }
+
+	    buf_len = sprintf(buf,
+	                      "0: %f 1: %f 2: %f 3: %f 4: %f 5: %f 6: %f 7: %f 8: %f 9: %f\r\n",
+	                      y_val[0],
+	                      y_val[1],
+	                      y_val[2],
+	                      y_val[3],
+	                      y_val[4],
+	                      y_val[5],
+	                      y_val[6],
+	                      y_val[7],
+	                      y_val[8],
+	                      y_val[9]
+	    						);
+
+	    HAL_UART_Transmit(&huart1, (uint8_t *)buf, buf_len, 100);
+
+//		HAL_UART_Transmit(&huart1, (uint8_t*)"dupa\r\n", strlen("dupa\r\n"), 1000);
 		HAL_Delay(1000);
+	  /*
+	  if (n_out > 0){
+		HAL_UART_Transmit(&huart1, out, n_out, HAL_MAX_DELAY);
+		n_out = 0;
+	  }
+	   */
 
     /* USER CODE END WHILE */
 
-//  MX_X_CUBE_AI_Process();
+  MX_X_CUBE_AI_Process();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -204,12 +271,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV2;
   RCC_OscInitStruct.PLL.PLLN = 8;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;

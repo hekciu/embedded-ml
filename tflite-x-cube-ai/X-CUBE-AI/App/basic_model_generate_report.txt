@@ -1,6 +1,6 @@
 ST Edge AI Core v2.2.0-20266 2adc00962
-Created date          : 2025-10-05 22:07:51
-Parameters            : generate --target stm32wb --name basic_model -m C:/Users/jakub/Desktop/programming/stm32/ml-embedded/digits-recognition-model/basic_model_converted.tflite --compression none --verbosity 1 --workspace C:/Users/jakub/AppData/Local/Temp/mxAI_workspace3131644015635004150088647952012140 --output C:/Users/jakub/.stm32cubemx/basic_model_output
+Created date          : 2025-10-25 22:16:50
+Parameters            : generate --target stm32wb --name basic_model -m C:/Users/jakub/Desktop/programming/stm32/ml-embedded/digits-recognition-model/basic_model_converted.tflite --compression none --verbosity 1 --workspace C:/Users/jakub/AppData/Local/Temp/mxAI_workspace3171751999050010855649086471109620 --output C:/Users/jakub/.stm32cubemx/basic_model_output
 
 Exec/report summary (generate)
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -11,7 +11,7 @@ compression        :   none
 options            :   allocate-inputs, allocate-outputs                                                                            
 optimization       :   balanced                                                                                                     
 target/series      :   stm32wb                                                                                                      
-workspace dir      :   C:\Users\jakub\AppData\Local\Temp\mxAI_workspace3131644015635004150088647952012140                           
+workspace dir      :   C:\Users\jakub\AppData\Local\Temp\mxAI_workspace3171751999050010855649086471109620                           
 output dir         :   C:\Users\jakub\.stm32cubemx\basic_model_output                                                               
 model_fmt          :   float                                                                                                        
 model_name         :   basic_model_converted                                                                                        
