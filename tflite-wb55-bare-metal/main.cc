@@ -15,7 +15,8 @@
 #define MODEL_PATH "/home/hekciu/programming/embedded-ml/sine-wave-model/models/sine_model.tflite"
 
 
-int main(void) {
+
+extern "C" int main(void) {
     /*
     TfLiteModel* model = TfLiteModelCreateFromFile(MODEL_PATH);
     TfLiteInterpreterOptions* options = TfLiteInterpreterOptionsCreate();
@@ -57,6 +58,4 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
   0, 0, 0, 0,
   0, 0, 0, 0
 };
-
 }
-

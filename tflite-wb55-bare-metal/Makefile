@@ -6,7 +6,7 @@ FLATBUFFERS_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/do
 GEMMLOWP_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
 
 
-main.o: main.cc Makefile
+main.o: main.cc Makefile 
 	arm-none-eabi-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
@@ -18,7 +18,6 @@ main.o: main.cc Makefile
 firmware.elf: main.o
 	arm-none-eabi-g++ \
     -T link.ld -nostdlib \
-    -L. -l:${TFLITE_MICRO_PATH} \
     main.o -o firmware.elf
 
 firmware.bin: firmware.elf
