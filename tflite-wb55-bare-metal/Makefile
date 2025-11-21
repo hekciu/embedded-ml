@@ -1,6 +1,5 @@
 
 ARM_GCC_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gcc_embedded/bin/arm-none-eabi-g++
-TFLITE_MICRO_PATH=tflite-micro/gen/cortex_m_generic_cortex-m4_default_cmsis_nn_gcc/lib/libtensorflow-microlite.a
 TFLITE_INCLUDE_PATH=${PWD}/tflite-micro
 FLATBUFFERS_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
 GEMMLOWP_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
