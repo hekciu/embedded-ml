@@ -1,5 +1,7 @@
 ENTRY(_reset);
 
+INCLUDE tflite-micro/tensorflow/lite/micro/tools/make/downloads/cmsis/CMSIS/Core/Template/Device_M/Config/Device_gcc.ld
+
 SEARCH_DIR(tflite-micro/gen/cortex_m_generic_cortex-m4_default_cmsis_nn_gcc/lib)
 INPUT(-ltensorflow-microlite)
 
@@ -28,7 +30,7 @@ INPUT(-lgcc)
 
 
 MEMORY {
-  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k
+  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 4096000k
   sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k  /* remaining 64k in a separate address space */
 }
 

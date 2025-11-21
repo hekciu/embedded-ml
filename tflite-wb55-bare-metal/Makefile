@@ -1,6 +1,9 @@
 
 # The base path for downloaded arm gcc toolchain
-ARM_NONE_EABI=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gcc_embedded/bin/arm-none-eabi
+# ARM_NONE_EABI=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gcc_embedded/bin/arm-none-eabi
+
+### OLDER VERSION INSTALLED ###
+ARM_NONE_EABI=arm-none-eabi
 
 TFLITE_INCLUDE_PATH=${PWD}/tflite-micro
 ARM_NONE_EABI_INCLUDE_PATH=tflite-micro/tensorflow/lite/micro/tools/make/downloads/gcc_embedded/arm-none-eabi/include
