@@ -1,3 +1,4 @@
+#define CMSIS_PATH ""
 
 #include <math.h>
 
