@@ -30,7 +30,7 @@ INPUT(-lgcc)
 
 
 MEMORY {
-  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 4096000k
+  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 200k
   sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k  /* remaining 64k in a separate address space */
 }
 

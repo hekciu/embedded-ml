@@ -1,5 +1,4 @@
-#define CMSIS_PATH ""
-
+/*
 #include <math.h>
 
 #include "tensorflow/lite/core/c/common.h"
@@ -12,7 +11,15 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 
 #include "sine_model.cc"
+*/
 
+#include "uart.hpp"
+
+
+static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
+
+
+/*
 static const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
 
 
@@ -27,7 +34,6 @@ namespace {
 
 
 extern "C" int main(void) {
-
     tflite::InitializeTarget();
 
     // Map the model into a usable data structure. This doesn't involve any
@@ -69,21 +75,24 @@ extern "C" int main(void) {
     // (golden_inputs_float[i] / input->params.scale + input->params.zero_point)
     int8_t golden_inputs_int8[kNumTestValues] = {-96, -63, -34, 0};
 
+    int8_t output_values[kNumTestValues] = {};
+
     for (int i = 0; i < kNumTestValues; ++i) {
         input->data.int8[0] = golden_inputs_int8[i];
         TF_LITE_ENSURE_STATUS(interpreter.Invoke());
-        float y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
-        TFLITE_CHECK_LE(abs(sin(golden_inputs_float[i]) - y_pred), epsilon);
+        // float y_pred = (output->data.int8[0] - output_zero_point) * output_scale;
+        // TFLITE_CHECK_LE(abs(sin(golden_inputs_float[i]) - y_pred), epsilon);
+        output_values[i] = output->data.int8[i];
     }
 
-    // return kTfLiteOk;
-
-    while(1) {};
+    return kTfLiteOk;
 }
+*/
 
-extern "C" {
+// extern "C" {
 
-__attribute__((naked, noreturn)) void _reset(void) {
+//__attribute__((naked, noreturn)) void _reset(void) {
+__attribute__((naked, noreturn)) void Reset_Handler(void) {
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
     for (long* bss_el = &_sbss; bss_el < &_ebss; bss_el++) {
@@ -96,9 +105,18 @@ __attribute__((naked, noreturn)) void _reset(void) {
         src_el++;
     }
 
-    main();
+    uart_init(115200);
+
+    for(;;) {
+        // main();
+
+        uart_transmit("dupa dupa\r\n");
+
+        spin(9999);
+    }
 }
 
+/*
 extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 63 STM32WB55-specific handlers
@@ -108,4 +126,8 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
   0, 0, 0, 0,
   0, 0, 0, 0
 };
-}
+*/
+
+// }
+
+

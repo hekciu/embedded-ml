@@ -10,6 +10,18 @@ ARM_NONE_EABI_INCLUDE_PATH=tflite-micro/tensorflow/lite/micro/tools/make/downloa
 FLATBUFFERS_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include
 GEMMLOWP_INCLUDE_PATH=${PWD}/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
 
+CMSIS_CORE_INCLUDE=cmsis/cmsis_core/CMSIS/Core/Include
+CMSIS_WB_INCLUDE=cmsis/cmsis_wb/Include
+
+
+uart.o: cc/uart.cc Makefile 
+	${ARM_NONE_EABI}-g++ \
+    -mcpu=cortex-m4 \
+    -fno-exceptions \
+    -I${CMSIS_CORE_INCLUDE} \
+    -I${CMSIS_WB_INCLUDE} \
+    -I./inc \
+    cc/uart.cc -c -o uart.o
 
 main.o: main.cc Makefile 
 	${ARM_NONE_EABI}-g++ \
@@ -18,15 +30,16 @@ main.o: main.cc Makefile
     -I${TFLITE_INCLUDE_PATH} \
     -I${FLATBUFFERS_INCLUDE_PATH} \
     -I${GEMMLOWP_INCLUDE_PATH} \
+    -I./inc \
     main.cc -c -o main.o
 
 # removed -nostdlib
-firmware.elf: main.o
+firmware.elf: main.o uart.o
 	${ARM_NONE_EABI}-g++ \
 	-T link.ld \
     -nostdlib \
     -fno-exceptions \
-	main.o -o firmware.elf
+	main.o uart.o -o firmware.elf
 
 firmware.bin: firmware.elf
 	${ARM_NONE_EABI}-objcopy -O binary firmware.elf firmware.bin
@@ -44,4 +57,4 @@ flash:
 	st-flash --reset write firmware.bin 0x8000000
 
 clean:
-	rm -f -- main.o firmware.elf firmware.bin firmware.s
+	rm -f -- *.o *.elf *.bin *.s
