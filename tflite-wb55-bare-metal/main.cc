@@ -89,10 +89,11 @@ extern "C" int main(void) {
 }
 */
 
-// extern "C" {
+extern "C" {
 
 //__attribute__((naked, noreturn)) void _reset(void) {
-__attribute__((naked, noreturn)) void Reset_Handler(void) {
+__attribute__((naked, noreturn)) void _reset(void) {
+    /*
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
     for (long* bss_el = &_sbss; bss_el < &_ebss; bss_el++) {
@@ -104,6 +105,7 @@ __attribute__((naked, noreturn)) void Reset_Handler(void) {
         dst_el++;
         src_el++;
     }
+    */
 
     uart_init(115200);
 
@@ -112,11 +114,11 @@ __attribute__((naked, noreturn)) void Reset_Handler(void) {
 
         uart_transmit("dupa dupa\r\n");
 
-        spin(9999);
+        spin(99999);
     }
 }
 
-/*
+
 extern void _estack(void);  // Defined in link.ld
 
 // 16 standard and 63 STM32WB55-specific handlers
@@ -126,8 +128,7 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
   0, 0, 0, 0,
   0, 0, 0, 0
 };
-*/
 
-// }
+}
 
 
