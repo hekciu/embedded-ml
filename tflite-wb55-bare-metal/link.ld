@@ -1,7 +1,7 @@
 ENTRY(_reset);
 
+INCLUDE cmsis/cmsis_core/CMSIS/DSP/Platforms/FVP/ARMCM4/LinkScripts/GCC/lnk.ld
 
-/*
 SEARCH_DIR(tflite-micro/gen/cortex_m_generic_cortex-m4_default_cmsis_nn_gcc/lib)
 INPUT(-ltensorflow-microlite)
 
@@ -27,7 +27,6 @@ INPUT(-lsupc++_nano)
 
 SEARCH_DIR(tensorflow/lite/micro/tools/make/downloads/gcc_embedded/lib/gcc/arm-none-eabi/14.3.1)
 INPUT(-lgcc)
-*/
 
 
 MEMORY {
@@ -41,7 +40,6 @@ SECTIONS {
     .vectors  : { KEEP(*(.vectors)) }   > flash
     .text     : {
         *(.text)
-        /*
         tensorflow-microlite:*(.text)
         stdc++:*(.text)
         m:*(.text)
@@ -62,7 +60,6 @@ SECTIONS {
         supc++:*(.text)
         supc++_nano:*(.text)
         gcc:*(.text)
-        */
     }           > flash
     .rodata   : { *(.rodata*) }         > flash
 

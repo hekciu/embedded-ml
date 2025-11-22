@@ -43,8 +43,8 @@ void uart_init(uint32_t baud) {
 }
 
 
-static void uart_transmit_char(char c) {
-    USART1->TDR = (uint32_t)c;
+void uart_transmit_char(char c) {
+   USART1->TDR = (uint32_t)c;
 
     while (!IS_FLAG_SET(USART1->ISR, 7)) {};
 }

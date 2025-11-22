@@ -1,4 +1,3 @@
-/*
 #include <math.h>
 
 #include "tensorflow/lite/core/c/common.h"
@@ -11,7 +10,6 @@
 #include "tensorflow/lite/schema/schema_generated.h"
 
 #include "sine_model.cc"
-*/
 
 #include "uart.hpp"
 #include "led.hpp"
@@ -20,7 +18,6 @@
 static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
 
 
-/*
 static const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
 
 
@@ -41,7 +38,8 @@ extern "C" int main(void) {
     // copying or parsing, it's a very lightweight operation.
     const tflite::Model* model =
       ::tflite::GetModel(sine_model_data);
-    TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
+
+    //TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
 
     HelloWorldOpResolver op_resolver;
     TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
@@ -51,6 +49,10 @@ extern "C" int main(void) {
     constexpr int kTensorArenaSize = 3000;
     uint8_t tensor_arena[kTensorArenaSize];
 
+    /*
+        This one here throws,
+        probably model C++ file should be created differently
+    */
     tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
                                        kTensorArenaSize);
 
@@ -61,6 +63,7 @@ extern "C" int main(void) {
 
     TfLiteTensor* output = interpreter.output(0);
     TFLITE_CHECK_NE(output, nullptr);
+
 
     float output_scale = output->params.scale;
     int output_zero_point = output->params.zero_point;
@@ -88,7 +91,6 @@ extern "C" int main(void) {
 
     return kTfLiteOk;
 }
-*/
 
 // extern "C" {
 
@@ -108,16 +110,22 @@ extern "C" __attribute__((naked, noreturn)) void _reset(void) {
     }
     */
 
-    uart_init(115200);
+    /* This one does work */
     setup_green_led();
+    uart_init(115200);
+
+    /* This one does not */
+    // setup_green_led();
+    // uart_init(115200);
 
     for(;;) {
-        // main();
+        main();
+
+        blink_green_led();
 
         uart_transmit("dupa dupa\r\n");
 
         spin(99999);
-        // blink_green_led();
     }
 }
 

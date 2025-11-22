@@ -26,11 +26,6 @@ led.o: cc/led.cc Makefile
 uart.o: cc/uart.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
-    -fno-exceptions \
-    -fstrict-volatile-bitfields \
-    -fno-rtti \
-    -fno-use-cxa-atexit \
-    -fno-threadsafe-statics \
     -I${CMSIS_CORE_INCLUDE} \
     -I${CMSIS_WB_INCLUDE} \
     -I./inc \
