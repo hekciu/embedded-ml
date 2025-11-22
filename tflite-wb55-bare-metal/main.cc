@@ -14,6 +14,7 @@
 */
 
 #include "uart.hpp"
+#include "led.hpp"
 
 
 static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
@@ -89,10 +90,10 @@ extern "C" int main(void) {
 }
 */
 
-extern "C" {
+// extern "C" {
 
 //__attribute__((naked, noreturn)) void _reset(void) {
-__attribute__((naked, noreturn)) void _reset(void) {
+extern "C" __attribute__((naked, noreturn)) void _reset(void) {
     /*
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
@@ -108,6 +109,7 @@ __attribute__((naked, noreturn)) void _reset(void) {
     */
 
     uart_init(115200);
+    setup_green_led();
 
     for(;;) {
         // main();
@@ -115,11 +117,12 @@ __attribute__((naked, noreturn)) void _reset(void) {
         uart_transmit("dupa dupa\r\n");
 
         spin(99999);
+        // blink_green_led();
     }
 }
 
 
-extern void _estack(void);  // Defined in link.ld
+extern "C" void _estack(void);  // Defined in link.ld
 
 // 16 standard and 63 STM32WB55-specific handlers
 __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
@@ -129,6 +132,6 @@ __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
   0, 0, 0, 0
 };
 
-}
+//}
 
 

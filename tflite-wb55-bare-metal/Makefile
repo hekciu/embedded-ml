@@ -14,16 +14,29 @@ CMSIS_CORE_INCLUDE=cmsis/cmsis_core/CMSIS/Core/Include
 CMSIS_WB_INCLUDE=cmsis/cmsis_wb/Include
 
 
-uart.o: cc/uart.cc Makefile 
+led.o: cc/led.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
     -I${CMSIS_CORE_INCLUDE} \
     -I${CMSIS_WB_INCLUDE} \
     -I./inc \
+    cc/led.cc -c -o led.o
+
+uart.o: cc/uart.cc Makefile
+	${ARM_NONE_EABI}-g++ \
+    -mcpu=cortex-m4 \
+    -fno-exceptions \
+    -fstrict-volatile-bitfields \
+    -fno-rtti \
+    -fno-use-cxa-atexit \
+    -fno-threadsafe-statics \
+    -I${CMSIS_CORE_INCLUDE} \
+    -I${CMSIS_WB_INCLUDE} \
+    -I./inc \
     cc/uart.cc -c -o uart.o
 
-main.o: main.cc Makefile 
+main.o: main.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
@@ -33,13 +46,12 @@ main.o: main.cc Makefile
     -I./inc \
     main.cc -c -o main.o
 
-# removed -nostdlib
-firmware.elf: main.o uart.o
+firmware.elf: main.o uart.o led.o link.ld
 	${ARM_NONE_EABI}-g++ \
 	-T link.ld \
     -nostdlib \
     -fno-exceptions \
-	main.o uart.o -o firmware.elf
+	main.o uart.o led.o -o firmware.elf
 
 firmware.bin: firmware.elf
 	${ARM_NONE_EABI}-objcopy -O binary firmware.elf firmware.bin
