@@ -1,15 +1,24 @@
+#define TF_LITE_STATIC_MEMORY
+
 #include <math.h>
 
 #include "tensorflow/lite/core/c/common.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/micro_allocator.h"
+// #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "tflite-micro/tensorflow/lite/micro/memory_helpers.h"
+#include "tflite-micro/tensorflow/lite/micro/micro_arena_constants.h"
+#include "tensorflow/lite/micro/memory_planner/greedy_memory_planner.h"
+#include "tensorflow/lite/micro/memory_planner/linear_memory_planner.h"
+#include "tensorflow/lite/micro/memory_planner/micro_memory_planner.h"
 
-#include "sine_model.cc"
+// #include "sine_model.cc"
+#include "sine_model_stolen.h"
 
 #include "uart.hpp"
 #include "led.hpp"
@@ -18,7 +27,15 @@
 static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
 
 
-static const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
+//const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
+//const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite_len;
+
+const void* sine_model_data = sine_model;
+const uint32_t sine_model_size = sine_model_len;
+
+
+static constexpr int kTensorArenaSize = 40000;
+static uint8_t tensor_arena[kTensorArenaSize];
 
 
 namespace {
@@ -36,25 +53,60 @@ extern "C" int main(void) {
 
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
-    const tflite::Model* model =
-      ::tflite::GetModel(sine_model_data);
 
-    //TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
+    /* This one also sometimes stales the application */
+
+    // TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
 
     HelloWorldOpResolver op_resolver;
     TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
 
     // Arena size just a round number. The exact arena usage can be determined
     // using the RecordingMicroInterpreter.
-    constexpr int kTensorArenaSize = 3000;
-    uint8_t tensor_arena[kTensorArenaSize];
+
+    // this part work
+    tflite::SingleArenaBufferAllocator* memory_allocator =
+       tflite::SingleArenaBufferAllocator::Create(tensor_arena, kTensorArenaSize);
+
+
+    uint8_t* aligned_arena =
+          tflite::AlignPointerUp(tensor_arena, tflite::MicroArenaBufferAlignment());
+
+    uint8_t* aligned_arena_AAAAAAAAAAA =
+          tflite::AlignPointerDown(tensor_arena, tflite::MicroArenaBufferAlignment());
+
+    //tflite::MicroMemoryPlanner* memory_planner =
+    //  tflite::CreateMemoryPlanner(memory_planner_type, memory_allocator);
+    
+    tflite::MicroMemoryPlanner* memory_planner = nullptr;
+    uint8_t* memory_planner_buffer = nullptr;
+
+    /* This one does not work (who would have guessed) */
+    memory_planner_buffer = memory_allocator->AllocatePersistentBuffer(
+      sizeof(tflite::LinearMemoryPlanner), alignof(tflite::LinearMemoryPlanner));
+
+    memory_planner = new (memory_planner_buffer) tflite::LinearMemoryPlanner();
+
+    uint8_t* allocator_buffer = memory_allocator->AllocatePersistentBuffer(
+      sizeof(tflite::MicroAllocator), alignof(tflite::MicroAllocator));
 
     /*
-        This one here throws,
-        probably model C++ file should be created differently
+    tflite::MicroAllocator* allocator = new (allocator_buffer)
+      tflite::MicroAllocator(memory_allocator, memory_allocator, memory_planner);
     */
+
+    auto micro_allocator = tflite::MicroAllocator::Create(
+              tensor_arena, kTensorArenaSize,
+              tflite::MemoryPlannerType::kLinear);
+
+    const tflite::Model* model =
+      ::tflite::GetModel(sine_model_data);
+
+    return 0;
+
     tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
-                                       kTensorArenaSize);
+                                           kTensorArenaSize);
+
 
     TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
 

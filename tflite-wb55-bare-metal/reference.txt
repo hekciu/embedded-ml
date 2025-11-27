@@ -1,3 +1,4 @@
 - https://mirzafahad.github.io/2020-06-16-tflite-stm32/
 - https://arobenko.github.io/bare_metal_cpp/
 - https://allthingsembedded.com/post/2020-04-11-mastering-the-gnu-linker-script/
+- https://medium.com/@jahiz.ahmed/deep-dive-into-the-tensorflow-workflow-2dfa211475d1

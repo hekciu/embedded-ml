@@ -2,3 +2,6 @@ tflite-micro/
 libtensorflow-microlite.a
 sine_model.cc
 cmsis/
+*.bin
+*.o
+*.elf
