@@ -53,7 +53,10 @@ namespace {
 
 typedef struct test {
     char dupa[20];
-    // char chuj[100];
+    char chuj[100];
+    char chuj2[1000];
+    char chuj3[10000];
+    char chuj4[100000];
 } test;
 
 int main(void) {
@@ -61,62 +64,23 @@ int main(void) {
 
     test t = {};
 
-    return 0;
-
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
 
     HelloWorldOpResolver op_resolver;
     TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
 
-    // Arena size just a round number. The exact arena usage can be determined
-    // using the RecordingMicroInterpreter.
-
-    // this part work
-    tflite::SingleArenaBufferAllocator* memory_allocator =
-       tflite::SingleArenaBufferAllocator::Create(tensor_arena, kTensorArenaSize);
-
-    uint8_t* aligned_arena =
-          tflite::AlignPointerUp(tensor_arena, tflite::MicroArenaBufferAlignment());
-
-    uint8_t* aligned_arena_AAAAAAAAAAA =
-          tflite::AlignPointerDown(tensor_arena, tflite::MicroArenaBufferAlignment());
-
-    //tflite::MicroMemoryPlanner* memory_planner =
-    //  tflite::CreateMemoryPlanner(memory_planner_type, memory_allocator);
-    
-    tflite::MicroMemoryPlanner* memory_planner = nullptr;
-    uint8_t* memory_planner_buffer = nullptr;
-    /*
-
-    memory_planner_buffer = memory_allocator->AllocatePersistentBuffer(
-      sizeof(tflite::LinearMemoryPlanner), alignof(tflite::LinearMemoryPlanner));
-
-    memory_planner = new (memory_planner_buffer) tflite::LinearMemoryPlanner();
-
-    uint8_t* allocator_buffer = memory_allocator->AllocatePersistentBuffer(
-      sizeof(tflite::MicroAllocator), alignof(tflite::MicroAllocator));
-
-    tflite::MicroAllocator* allocator = new (allocator_buffer)
-      tflite::MicroAllocator(memory_allocator, memory_allocator, memory_planner);
-
-    auto micro_allocator = tflite::MicroAllocator::Create(
-              tensor_arena, kTensorArenaSize,
-              tflite::MemoryPlannerType::kLinear);
-    */
-
     const tflite::Model* model =
       ::tflite::GetModel(sine_model_data);
-
-    //TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
-
-    TfLiteContext context = {};
 
     tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
                                            kTensorArenaSize);
 
 
+    // teraz tutaj sie wywala
     TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
+
+    return 0;
 
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_CHECK_NE(input, nullptr);
@@ -155,6 +119,7 @@ int main(void) {
 
 //__attribute__((naked, noreturn)) void _reset(void) {
 extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
+    /*
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
     for (long* bss_el = &_sbss; bss_el < &_ebss; bss_el++) {
@@ -166,21 +131,22 @@ extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
         dst_el++;
         src_el++;
     }
+    */
 
     /* This one does work */
     setup_green_led();
-    uart_init(115200);
+    // uart_init(115200);
 
     /* This one does not */
     // setup_green_led();
     // uart_init(115200);
 
     for(;;) {
-        // main();
+        main();
 
         blink_green_led();
 
-        uart_transmit("dupa dupa\r\n");
+        // uart_transmit("dupa dupa\r\n");
 
         spin(99999);
     }
@@ -190,7 +156,7 @@ extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
 extern "C" void _estack(void);  // Defined in link.ld
 
 // 16 standard and 63 STM32WB55-specific handlers
-__attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
+extern "C" __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
   _estack, Reset_Handler, 0, 0,
   0, 0, 0, 0,
   0, 0, 0, 0,

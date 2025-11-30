@@ -1,10 +1,5 @@
 
-
-INCLUDE cmsis/cmsis_core/CMSIS/DSP/Platforms/FVP/ARMCM4/LinkScripts/GCC/lnk.ld
-
-/*
-ENTRY(_reset);
-*/
+ENTRY(Reset_Handler);
 
 SEARCH_DIR(tflite-micro/gen/cortex_m_generic_cortex-m4_default_cmsis_nn_gcc/lib)
 INPUT(-ltensorflow-microlite)
@@ -40,9 +35,9 @@ MEMORY {
 _estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
 
 SECTIONS {
-    .vectors  : { KEEP(*(.vectors)) }   > flash
     .text     : {
         . = ALIGN(4);
+        KEEP(*(.vectors .vectors.*))
         *(.text)
         tensorflow-microlite:*(.text)
         stdc++:*(.text)
@@ -85,6 +80,14 @@ SECTIONS {
         supc++_nano:*(.text*)
         gcc:*(.text*)
     }           > flash
+
+
+    __exidx_start = .;
+    .ARM.exidx :
+    {
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    } > flash
+    __exidx_end = .;
 
     .rodata   : {
         *(.rodata)
@@ -199,9 +202,34 @@ SECTIONS {
         supc++:*(.bss)
         supc++_nano:*(.bss)
         gcc:*(.bss)
+
+        *(.bss*)
+        tensorflow-microlite:*(.bss*)
+        stdc++:*(.bss*)
+        m:*(.bss*)
+        c:*(.bss*)
+        c_nano:*(.bss*)
+        g:*(.bss*)
+        gfortran:*(.bss*)
+        gloss-linux:*(.bss*)
+        g_nano:*(.bss*)
+        nosys:*(.bss*)
+        rdimon:*(.bss*)
+        rdimon_nano:*(.bss*)
+        rdimon-v2m:*(.bss*)
+        rdpmon:*(.bss*)
+        stdc++exp:*(.bss*)
+        stdc++_nano:*(.bss*)
+        supc++:*(.bss*)
+        supc++_nano:*(.bss*)
+        gcc:*(.bss*)
     _ebss = .;              /* .bss section end */
     } > sram
 
     . = ALIGN(8);
     _end = .;     /* for cmsis_gcc.h  */
 }
+
+/*
+INCLUDE cmsis/cmsis_core/CMSIS/DSP/Platforms/FVP/ARMCM4/LinkScripts/GCC/lnk.ld
+*/
