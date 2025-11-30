@@ -1,6 +1,10 @@
-ENTRY(_reset);
+
 
 INCLUDE cmsis/cmsis_core/CMSIS/DSP/Platforms/FVP/ARMCM4/LinkScripts/GCC/lnk.ld
+
+/*
+ENTRY(_reset);
+*/
 
 SEARCH_DIR(tflite-micro/gen/cortex_m_generic_cortex-m4_default_cmsis_nn_gcc/lib)
 INPUT(-ltensorflow-microlite)
@@ -11,7 +15,6 @@ INPUT(-lm)
 INPUT(-lc)
 INPUT(-lc_nano)
 INPUT(-lg)
-INPUT(-lgfortran)
 INPUT(-lgfortran)
 INPUT(-lgloss-linux)
 INPUT(-lg_nano)
@@ -30,8 +33,8 @@ INPUT(-lgcc)
 
 
 MEMORY {
-  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 2048k
-  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 192k  /* remaining 64k in a separate address space */
+  flash(rx)  : ORIGIN = 0x08000000, LENGTH = 0x100000
+  sram(rwx) : ORIGIN = 0x20000000, LENGTH = 0x30000
 }
 
 _estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
@@ -39,6 +42,7 @@ _estack     = ORIGIN(sram) + LENGTH(sram);    /* stack points to end of SRAM */
 SECTIONS {
     .vectors  : { KEEP(*(.vectors)) }   > flash
     .text     : {
+        . = ALIGN(4);
         *(.text)
         tensorflow-microlite:*(.text)
         stdc++:*(.text)
@@ -46,7 +50,6 @@ SECTIONS {
         c:*(.text)
         c_nano:*(.text)
         g:*(.text)
-        gfortran:*(.text)
         gfortran:*(.text)
         gloss-linux:*(.text)
         g_nano:*(.text)
@@ -60,20 +63,142 @@ SECTIONS {
         supc++:*(.text)
         supc++_nano:*(.text)
         gcc:*(.text)
+
+        *(.text*)
+        tensorflow-microlite:*(.text*)
+        stdc++:*(.text*)
+        m:*(.text*)
+        c:*(.text*)
+        c_nano:*(.text*)
+        g:*(.text*)
+        gfortran:*(.text*)
+        gloss-linux:*(.text*)
+        g_nano:*(.text*)
+        nosys:*(.text*)
+        rdimon:*(.text*)
+        rdimon_nano:*(.text*)
+        rdimon-v2m:*(.text*)
+        rdpmon:*(.text*)
+        stdc++exp:*(.text*)
+        stdc++_nano:*(.text*)
+        supc++:*(.text*)
+        supc++_nano:*(.text*)
+        gcc:*(.text*)
     }           > flash
-    .rodata   : { *(.rodata*) }         > flash
+
+    .rodata   : {
+        *(.rodata)
+        tensorflow-microlite:*(.rodata)
+        stdc++:*(.rodata)
+        m:*(.rodata)
+        c:*(.rodata)
+        c_nano:*(.rodata)
+        g:*(.rodata)
+        gfortran:*(.rodata)
+        gloss-linux:*(.rodata)
+        g_nano:*(.rodata)
+        nosys:*(.rodata)
+        rdimon:*(.rodata)
+        rdimon_nano:*(.rodata)
+        rdimon-v2m:*(.rodata)
+        rdpmon:*(.rodata)
+        stdc++exp:*(.rodata)
+        stdc++_nano:*(.rodata)
+        supc++:*(.rodata)
+        supc++_nano:*(.rodata)
+        gcc:*(.rodata)
+
+        *(.rodata*)
+        tensorflow-microlite:*(.rodata*)
+        stdc++:*(.rodata*)
+        m:*(.rodata*)
+        c:*(.rodata*)
+        c_nano:*(.rodata*)
+        g:*(.rodata*)
+        gfortran:*(.rodata*)
+        gloss-linux:*(.rodata*)
+        g_nano:*(.rodata*)
+        nosys:*(.rodata*)
+        rdimon:*(.rodata*)
+        rdimon_nano:*(.rodata*)
+        rdimon-v2m:*(.rodata*)
+        rdpmon:*(.rodata*)
+        stdc++exp:*(.rodata*)
+        stdc++_nano:*(.rodata*)
+        supc++:*(.rodata*)
+        supc++_nano:*(.rodata*)
+        gcc:*(.rodata*)
+    }         > flash
 
     .data : {
         _sdata = .;   /* .data section start */
-        *(.first_data)
-        *(.data SORT(.data.*))
+        *(.data)
+        tensorflow-microlite:*(.data)
+        stdc++:*(.data)
+        m:*(.data)
+        c:*(.data)
+        c_nano:*(.data)
+        g:*(.data)
+        gfortran:*(.data)
+        gloss-linux:*(.data)
+        g_nano:*(.data)
+        nosys:*(.data)
+        rdimon:*(.data)
+        rdimon_nano:*(.data)
+        rdimon-v2m:*(.data)
+        rdpmon:*(.data)
+        stdc++exp:*(.data)
+        stdc++_nano:*(.data)
+        supc++:*(.data)
+        supc++_nano:*(.data)
+        gcc:*(.data)
+
+        *(.data*)
+        tensorflow-microlite:*(.data*)
+        stdc++:*(.data*)
+        m:*(.data*)
+        c:*(.data*)
+        c_nano:*(.data*)
+        g:*(.data*)
+        gfortran:*(.data*)
+        gloss-linux:*(.data*)
+        g_nano:*(.data*)
+        nosys:*(.data*)
+        rdimon:*(.data*)
+        rdimon_nano:*(.data*)
+        rdimon-v2m:*(.data*)
+        rdpmon:*(.data*)
+        stdc++exp:*(.data*)
+        stdc++_nano:*(.data*)
+        supc++:*(.data*)
+        supc++_nano:*(.data*)
+        gcc:*(.data*)
         _edata = .;  /* .data section end */
     } > sram AT > flash
     _sidata = LOADADDR(.data);
 
     .bss : {
     _sbss = .;              /* .bss section start */
-    *(.bss SORT(.bss.*) COMMON)
+        *(.bss)
+        tensorflow-microlite:*(.bss)
+        stdc++:*(.bss)
+        m:*(.bss)
+        c:*(.bss)
+        c_nano:*(.bss)
+        g:*(.bss)
+        gfortran:*(.bss)
+        gloss-linux:*(.bss)
+        g_nano:*(.bss)
+        nosys:*(.bss)
+        rdimon:*(.bss)
+        rdimon_nano:*(.bss)
+        rdimon-v2m:*(.bss)
+        rdpmon:*(.bss)
+        stdc++exp:*(.bss)
+        stdc++_nano:*(.bss)
+        supc++:*(.bss)
+        supc++_nano:*(.bss)
+        gcc:*(.bss)
     _ebss = .;              /* .bss section end */
     } > sram
 

@@ -8,6 +8,7 @@
 // #include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
+#include "tflite-micro/tensorflow/lite/micro/micro_interpreter_graph.h"
 #include "tensorflow/lite/micro/recording_micro_interpreter.h"
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/schema/schema_generated.h"
@@ -17,8 +18,10 @@
 #include "tensorflow/lite/micro/memory_planner/linear_memory_planner.h"
 #include "tensorflow/lite/micro/memory_planner/micro_memory_planner.h"
 
-// #include "sine_model.cc"
-#include "sine_model_stolen.h"
+
+#include "sine_model.cc"
+// #include "sine_model_stolen.h"
+
 
 #include "uart.hpp"
 #include "led.hpp"
@@ -27,11 +30,11 @@
 static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
 
 
-//const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
-//const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite_len;
+const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
+const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite_len;
 
-const void* sine_model_data = sine_model;
-const uint32_t sine_model_size = sine_model_len;
+//const void* sine_model_data = sine_model;
+//const uint32_t sine_model_size = sine_model_len;
 
 
 static constexpr int kTensorArenaSize = 40000;
@@ -48,15 +51,20 @@ namespace {
 }
 
 
-extern "C" int main(void) {
+typedef struct test {
+    char dupa[20];
+    // char chuj[100];
+} test;
+
+int main(void) {
     tflite::InitializeTarget();
+
+    test t = {};
+
+    return 0;
 
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
-
-    /* This one also sometimes stales the application */
-
-    // TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
 
     HelloWorldOpResolver op_resolver;
     TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
@@ -67,7 +75,6 @@ extern "C" int main(void) {
     // this part work
     tflite::SingleArenaBufferAllocator* memory_allocator =
        tflite::SingleArenaBufferAllocator::Create(tensor_arena, kTensorArenaSize);
-
 
     uint8_t* aligned_arena =
           tflite::AlignPointerUp(tensor_arena, tflite::MicroArenaBufferAlignment());
@@ -80,8 +87,8 @@ extern "C" int main(void) {
     
     tflite::MicroMemoryPlanner* memory_planner = nullptr;
     uint8_t* memory_planner_buffer = nullptr;
+    /*
 
-    /* This one does not work (who would have guessed) */
     memory_planner_buffer = memory_allocator->AllocatePersistentBuffer(
       sizeof(tflite::LinearMemoryPlanner), alignof(tflite::LinearMemoryPlanner));
 
@@ -90,19 +97,20 @@ extern "C" int main(void) {
     uint8_t* allocator_buffer = memory_allocator->AllocatePersistentBuffer(
       sizeof(tflite::MicroAllocator), alignof(tflite::MicroAllocator));
 
-    /*
     tflite::MicroAllocator* allocator = new (allocator_buffer)
       tflite::MicroAllocator(memory_allocator, memory_allocator, memory_planner);
-    */
 
     auto micro_allocator = tflite::MicroAllocator::Create(
               tensor_arena, kTensorArenaSize,
               tflite::MemoryPlannerType::kLinear);
+    */
 
     const tflite::Model* model =
       ::tflite::GetModel(sine_model_data);
 
-    return 0;
+    //TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
+
+    TfLiteContext context = {};
 
     tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
                                            kTensorArenaSize);
@@ -144,11 +152,9 @@ extern "C" int main(void) {
     return kTfLiteOk;
 }
 
-// extern "C" {
 
 //__attribute__((naked, noreturn)) void _reset(void) {
-extern "C" __attribute__((naked, noreturn)) void _reset(void) {
-    /*
+extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
     for (long* bss_el = &_sbss; bss_el < &_ebss; bss_el++) {
@@ -160,7 +166,6 @@ extern "C" __attribute__((naked, noreturn)) void _reset(void) {
         dst_el++;
         src_el++;
     }
-    */
 
     /* This one does work */
     setup_green_led();
@@ -171,7 +176,7 @@ extern "C" __attribute__((naked, noreturn)) void _reset(void) {
     // uart_init(115200);
 
     for(;;) {
-        main();
+        // main();
 
         blink_green_led();
 
@@ -186,12 +191,10 @@ extern "C" void _estack(void);  // Defined in link.ld
 
 // 16 standard and 63 STM32WB55-specific handlers
 __attribute__((section(".vectors"))) void (*const tab[16 + 63])(void) = {
-  _estack, _reset, 0, 0,
+  _estack, Reset_Handler, 0, 0,
   0, 0, 0, 0,
   0, 0, 0, 0,
   0, 0, 0, 0
 };
-
-//}
 
 
