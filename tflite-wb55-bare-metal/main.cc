@@ -23,8 +23,8 @@
 #include "tflite-micro/tensorflow/lite/micro/debug_log.h"
 
 
-#include "sine_model.cc"
-// #include "sine_model_stolen.h"
+// #include "sine_model.cc"
+#include "sine_model_stolen.h"
 
 
 #include "uart.hpp"
@@ -34,11 +34,11 @@
 static void spin(uint32_t ticks) { while (ticks > 0) ticks--; };
 
 
-const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
-const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite_len;
+//const void* sine_model_data = (const void *)_home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite;
+//const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb55_bare_metal____sine_wave_model_models_sine_model_tflite_len;
 
-//const void* sine_model_data = sine_model;
-//const uint32_t sine_model_size = sine_model_len;
+const void* sine_model_data = sine_model;
+const uint32_t sine_model_size = sine_model_len;
 
 
 
@@ -55,32 +55,24 @@ namespace {
 }
 
 int main(void) {
-    return 0;
-
     tflite::InitializeTarget();
-
-    // test t = {};
-
-    // Map the model into a usable data structure. This doesn't involve any
-    // copying or parsing, it's a very lightweight operation.
 
     HelloWorldOpResolver op_resolver;
     TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
 
-    const tflite::Model* model =
-      ::tflite::GetModel(sine_model_data);
-
+    constexpr int kTensorArenaSize = 3000;
     uint8_t tensor_arena[kTensorArenaSize];
+    constexpr int kNumResourceVariables = 24;
 
-    tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
-                                           kTensorArenaSize);
+    tflite::RecordingMicroAllocator* allocator(
+      tflite::RecordingMicroAllocator::Create(tensor_arena, kTensorArenaSize));
+    tflite::RecordingMicroInterpreter interpreter(
+      tflite::GetModel(sine_model_data), op_resolver, allocator,
+      tflite::MicroResourceVariables::Create(allocator, kNumResourceVariables));
 
-    return 0;
-
-    MicroPrintf("dupa\r\n");
+    MicroPrintf("dupa\n\r");
 
     // teraz tutaj sie wywala
-
     const auto debug_status = interpreter.AllocateTensors();
 
     TF_LITE_ENSURE_STATUS(debug_status);
@@ -90,7 +82,6 @@ int main(void) {
 
     TfLiteTensor* output = interpreter.output(0);
     TFLITE_CHECK_NE(output, nullptr);
-
 
     float output_scale = output->params.scale;
     int output_zero_point = output->params.zero_point;
@@ -115,6 +106,8 @@ int main(void) {
         // TFLITE_CHECK_LE(abs(sin(golden_inputs_float[i]) - y_pred), epsilon);
         output_values[i] = output->data.int8[i];
     }
+
+    MicroPrintf("test %d %d %d %d\n\r", output_values[0], output_values[1], output_values[2], output_values[3]);
 
     return kTfLiteOk;
 }
@@ -150,7 +143,7 @@ extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
     // uart_init(115200);
 
     for(;;) {
-        // main();
+        main();
 
         blink_green_led();
 
@@ -158,7 +151,7 @@ extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
 
         //DebugLog("test\n\r", vl);
 
-        MicroPrintf("dupa MicroPrintf\n\r");
+        // MicroPrintf("dupa MicroPrintf\n\r");
 
         //uart_transmit("dupa uart_transmit\r\n");
 
