@@ -1,11 +1,12 @@
 #define TF_LITE_STATIC_MEMORY
+// #define TF_LITE_STRIP_ERROR_STRINGS
 
 #include <math.h>
 
 #include "tensorflow/lite/core/c/common.h"
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_allocator.h"
-// #include "tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/micro/micro_log.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/micro_profiler.h"
 #include "tflite-micro/tensorflow/lite/micro/micro_interpreter_graph.h"
@@ -17,6 +18,9 @@
 #include "tensorflow/lite/micro/memory_planner/greedy_memory_planner.h"
 #include "tensorflow/lite/micro/memory_planner/linear_memory_planner.h"
 #include "tensorflow/lite/micro/memory_planner/micro_memory_planner.h"
+
+#include "tensorflow/lite/micro/cortex_m_generic/debug_log_callback.h"
+#include "tflite-micro/tensorflow/lite/micro/debug_log.h"
 
 
 #include "sine_model.cc"
@@ -37,8 +41,8 @@ const uint32_t sine_model_size = _home_hekciu_programming_embedded_ml_tflite_wb5
 //const uint32_t sine_model_size = sine_model_len;
 
 
-static constexpr int kTensorArenaSize = 40000;
-static uint8_t tensor_arena[kTensorArenaSize];
+
+static constexpr int kTensorArenaSize = 100000;
 
 
 namespace {
@@ -50,19 +54,12 @@ namespace {
     }
 }
 
-
-typedef struct test {
-    char dupa[20];
-    char chuj[100];
-    char chuj2[1000];
-    char chuj3[10000];
-    char chuj4[100000];
-} test;
-
 int main(void) {
+    return 0;
+
     tflite::InitializeTarget();
 
-    test t = {};
+    // test t = {};
 
     // Map the model into a usable data structure. This doesn't involve any
     // copying or parsing, it's a very lightweight operation.
@@ -73,14 +70,20 @@ int main(void) {
     const tflite::Model* model =
       ::tflite::GetModel(sine_model_data);
 
+    uint8_t tensor_arena[kTensorArenaSize];
+
     tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
                                            kTensorArenaSize);
 
+    return 0;
+
+    MicroPrintf("dupa\r\n");
 
     // teraz tutaj sie wywala
-    TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
 
-    return 0;
+    const auto debug_status = interpreter.AllocateTensors();
+
+    TF_LITE_ENSURE_STATUS(debug_status);
 
     TfLiteTensor* input = interpreter.input(0);
     TFLITE_CHECK_NE(input, nullptr);
@@ -117,9 +120,13 @@ int main(void) {
 }
 
 
+void debug_log_printf(const char* s) {
+    uart_transmit(s);
+}
+
+
 //__attribute__((naked, noreturn)) void _reset(void) {
 extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
-    /*
     extern long _sdata, _edata, _sbss, _ebss, _sidata;
 
     for (long* bss_el = &_sbss; bss_el < &_ebss; bss_el++) {
@@ -131,22 +138,29 @@ extern "C" __attribute__((naked, noreturn)) void Reset_Handler(void) {
         dst_el++;
         src_el++;
     }
-    */
+
+    RegisterDebugLogCallback(debug_log_printf);
 
     /* This one does work */
     setup_green_led();
-    // uart_init(115200);
+    uart_init(115200);
 
     /* This one does not */
     // setup_green_led();
     // uart_init(115200);
 
     for(;;) {
-        main();
+        // main();
 
         blink_green_led();
 
-        // uart_transmit("dupa dupa\r\n");
+        // va_list vl;
+
+        //DebugLog("test\n\r", vl);
+
+        MicroPrintf("dupa MicroPrintf\n\r");
+
+        //uart_transmit("dupa uart_transmit\r\n");
 
         spin(99999);
     }

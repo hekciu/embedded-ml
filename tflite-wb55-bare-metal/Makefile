@@ -18,6 +18,7 @@ led.o: cc/led.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
+    -g \
     -I${CMSIS_CORE_INCLUDE} \
     -I${CMSIS_WB_INCLUDE} \
     -I./inc \
@@ -27,6 +28,7 @@ uart.o: cc/uart.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
+    -g \
     -I${CMSIS_CORE_INCLUDE} \
     -I${CMSIS_WB_INCLUDE} \
     -I./inc \
@@ -36,6 +38,7 @@ main.o: main.cc Makefile
 	${ARM_NONE_EABI}-g++ \
     -mcpu=cortex-m4 \
     -fno-exceptions \
+    -g \
     -I${TFLITE_INCLUDE_PATH} \
     -I${FLATBUFFERS_INCLUDE_PATH} \
     -I${GEMMLOWP_INCLUDE_PATH} \
@@ -48,6 +51,7 @@ firmware.elf: main.o uart.o led.o link.ld
     -nostdlib \
     -mcpu=cortex-m4 \
     -fno-exceptions \
+    -g \
 	main.o uart.o led.o -o firmware.elf
 
 firmware.bin: firmware.elf
