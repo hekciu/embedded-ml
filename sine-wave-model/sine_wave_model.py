@@ -104,7 +104,7 @@ plt.plot(x_test, y_test_pred, 'r.', label='TF predictions')
 plt.legend()
 plt.show()
 
-model_1.save(MODEL_TF)
+# cmodel_1.save(MODEL_TF)
 
 # Convert the model to the TensorFlow Lite format without quantization
 converter = tf.lite.TFLiteConverter.from_saved_model(MODEL_TF)
